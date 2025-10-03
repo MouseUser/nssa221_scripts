@@ -33,7 +33,7 @@ def findNetworkConfig():
     return defaultGateway, hostname, domain, ipAddress, netMask, dns1, dns2
 
 def findCPUInfo():
-    CPUInfo = subprocess.check_output(["cat", "/proc/cpuinfo"]).split(":")
+    CPUInfo = subprocess.check_output(["cat", "/proc/cpuinfo"], text=True).split(":")
     CPUModel = ""
     processorsNumber = ""
     coresNumber = ""
