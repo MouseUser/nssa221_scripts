@@ -145,10 +145,10 @@ def main():
     fileContents = generateList()
     filePath = "~/" + subprocess.check_output(["hostname"], text=True).split(".")[0] + "_system_report.log"
 
-    with open(filePath, "w") as file:
-        for line in fileContents:
-            print(line)
-            file.write(line + "\n")
+    file = open(filePath, "w")
+    for line in fileContents:
+        print(line)
+        file.write(line + "\n")
 
 if __name__ == "__main__":
     main()
