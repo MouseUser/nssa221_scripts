@@ -31,20 +31,21 @@ def findNetworkConfig():
                 dns2 = DNSInfo[j+1]
     
     return defaultGateway, hostname, domain, ipAddress, netMask, dns1, dns2
-
+    
 def findCPUInfo():
-    CPUInfo = subprocess.check_output(["cat", "/proc/cpuinfo"], text=True).split(":")
+    CPUInfo = subprocess.check_output(["cat", "/proc/cpuinfo"], text=True).split("\n")
     CPUModel = ""
     processorsNumber = ""
     coresNumber = ""
 
     for i in range(0, len(CPUInfo)):
-        if CPUInfo[i].strip() == "model name":
-            CPUModel = CPUInfo[i+1]
-        elif CPUInfo[i].strip() == "siblings":
-            processorsNumber = CPUInfo[i+1]
-        elif CPUInfo[i].strip() == "cpu cores":
-            coresNumber = CPUInfo[i+1]
+        splitLine = CPUInfo[i].split(":")
+        if splitLine[0].strip() == "model name":
+            CPUModel = splitLine[1].strip()
+        elif splitLine[0].strip() == "siblings":
+            processorsNumber = splitLine[1].strip()
+        elif splitLine[0].strip() == "cpu cores":
+            coresNumber = splitLine[1].strip()
     
     return CPUModel, processorsNumber, coresNumber
 
