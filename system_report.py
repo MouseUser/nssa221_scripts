@@ -77,9 +77,9 @@ def findStorageInfo():
             usedStorage = storageInfo[i-3]
             break
     
-    totalStorage = str((int(usedStorage) + int(freeStorage))/1073742) + " GiB"
-    usedStorage = str(int(usedStorage)/1073742) + " GiB"
-    freeStorage = str(int(freeStorage)/1073742) + " GiB"
+    totalStorage = str((round(int(usedStorage) + int(freeStorage))/1073742)) + " GiB"
+    usedStorage = str(round(int(usedStorage)/1073742)) + " GiB"
+    freeStorage = str(round(int(freeStorage)/1073742)) + " GiB"
 
     return totalStorage, usedStorage, freeStorage
 
@@ -94,8 +94,8 @@ def findMemoryInfo():
             availableRAM = memoryInfo[i+3]
             break
     
-    totalRAM = str(int(totalRAM)/1073742) + " GiB"
-    availableRAM = str(int(availableRAM)/1073742) + " GiB"
+    totalRAM = str(round(int(totalRAM)/1073742, 1)) + " GiB"
+    availableRAM = str(round(int(availableRAM)/1073742, 1)) + " GiB"
 
     return totalRAM, availableRAM
 
@@ -143,7 +143,7 @@ def generateList():
 def main():
     subprocess.run(["clear"])
     fileContents = generateList()
-    filePath = "/home/" + subprocess.check_output(["whoami"], text=True) + "/" + subprocess.check_output(["hostname"], text=True).split(".")[0] + "_system_report.log"
+    filePath = "/home/" + subprocess.check_output(["whoami"], text=True).strip() + "/" + subprocess.check_output(["hostname"], text=True).split(".")[0] + "_system_report.log"
 
     file = open(filePath, "w")
     for line in fileContents:
