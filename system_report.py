@@ -3,6 +3,7 @@
 # Date: 10/3/25
 
 import subprocess
+from types import MemberDescriptorType
 
 def findNetworkConfig():
     defaultGateway = subprocess.check_output(["ip", "route"], text=True).split()[2]
@@ -18,6 +19,7 @@ def findNetworkConfig():
             ipAddress = IPInfo[i+1]
         elif IPInfo[i] == "netmask":
             netMask = IPInfo[i+1]
+            break
 
     DNSInfo = subprocess.check_output(["cat", "/etc/resolv.conf"], text=True).split()
     dns1 = ""
@@ -49,7 +51,7 @@ def findCPUInfo():
     return CPUModel, processorsNumber, coresNumber
 
 def findOSInfo():
-    OSInfo = subprocess.check_output(["cat", "/etc/*release"], text=True).split("\n")
+    OSInfo = subprocess.check_output(["cat", "/etc/os-release"], text=True).split("\n")
     OSName = ""
     OSVersion = ""
     kernelVersion = subprocess.check_output(["uname", "-r"], text=True)
@@ -63,36 +65,90 @@ def findOSInfo():
     
     return OSName, OSVersion, kernelVersion
 
-def printAndExport():
-    date = subprocess.check_output(["date"], text=True)
-    print("System Report - " + date)
-    defaultGateway, hostname, domain, ipAddress, netmask, dns1, dns2 = findNetworkConfig()
-    print("Device Information")
-    print("Hostname:\t" + hostname)
-    print("Domain:\t" + domain + "\n")
+def findStorageInfo():
+    storageInfo = subprocess.check_output(["df"], text=True).split()
+    totalStorage = ""
+    usedStorage = ""
+    freeStorage = ""
+
+    for i in range(0, len(storageInfo)):
+        if storageInfo[i].strip() == "/":
+            freeStorage = storageInfo[i-2]
+            usedStorage = storageInfo[i-3]
+            break
     
-    print("Network Information")
-    print("IP Address:\t" + ipAddress)
-    print("Gateway:\t" + defaultGateway)
-    print("Network Mask:\t" + netmask)
-    print("DNS1:\t" + dns1)
-    print("DNS2:\t" + dns2 + "\n")
+    totalStorage = str((int(usedStorage) + int(freeStorage))/1073742) + " GiB"
+    usedStorage = str(int(usedStorage)/1073742) + " GiB"
+    freeStorage = str(int(freeStorage)/1073742) + " GiB"
+
+    return totalStorage, usedStorage, freeStorage
+
+def findMemoryInfo():
+    memoryInfo = subprocess.check_output(["free"], text=True).split()
+    totalRAM = ""
+    availableRAM = ""
+
+    for i in range(0, len(memoryInfo)):
+        if memoryInfo[i].strip() == "Mem:":
+            totalRAM = memoryInfo[i+1]
+            availableRAM = memoryInfo[i+3]
+            break
+    
+    totalRAM = str(int(totalRAM)/1073742) + " GiB"
+    availableRAM = str(int(availableRAM)/1073742) + " GiB"
+
+    return totalRAM, availableRAM
+
+def generateList():
+    date = subprocess.check_output(["date"], text=True)
+    fileContents = []
+    fileContents.append("System Report - " + date)
+    defaultGateway, hostname, domain, ipAddress, netmask, dns1, dns2 = findNetworkConfig()
+    fileContents.append("Device Information")
+    fileContents.append("Hostname:        " + hostname)
+    fileContents.append("Domain:          " + domain + "\n")
+    
+    fileContents.append("Network Information")
+    fileContents.append("IP Address:      " + ipAddress)
+    fileContents.append("Gateway:         " + defaultGateway)
+    fileContents.append("Network Mask:    " + netmask)
+    fileContents.append("DNS1:            " + dns1)
+    fileContents.append("DNS2:            " + dns2 + "\n")
 
     OSName, OSVersion, kernelVersion = findOSInfo()
-    print("Operating System Information")
-    print("Operating System:\t" + OSName)
-    print("OS Version:\t" + OSVersion)
-    print("Kernel Version:\t" + kernelVersion + "\n")
+    fileContents.append("Operating System Information")
+    fileContents.append("Operating System: " + OSName)
+    fileContents.append("OS Version:      " + OSVersion)
+    fileContents.append("Kernel Version:  " + kernelVersion + "\n")
+
+    totalStorage, usedStorage, freeStorage = findStorageInfo()
+    fileContents.append("Storage Information")
+    fileContents.append("System Drive Total: " + totalStorage)
+    fileContents.append("System Drive Used: " + usedStorage)
+    fileContents.append("System Drive Free: " + freeStorage + "\n")
 
     CPUModel, processorsNumber, coresNumber = findCPUInfo()
-    print("Processor Information")
-    print("CPU Model:\t" + CPUModel)
-    print("Number of processors:\t" + processorsNumber)
-    print("Number of cores:\t" + coresNumber + "\n")
+    fileContents.append("Processor Information")
+    fileContents.append("CPU Model:       " + CPUModel)
+    fileContents.append("Number of processors: " + processorsNumber)
+    fileContents.append("Number of cores: " + coresNumber + "\n")
+
+    totalRAM, availableRAM = findMemoryInfo()
+    fileContents.append("Memory Information")
+    fileContents.append("Total RAM:       " + totalRAM)
+    fileContents.append("Available RAM:   " + availableRAM + "\n")
+
+    return fileContents
 
 def main():
     subprocess.run(["clear"])
-    printAndExport()
+    fileContents = generateList()
+    filePath = "~/" + subprocess.check_output(["hostname"], text=True).split(".")[0] + "_system_report.log"
+
+    with open(filePath, "w") as file:
+        for line in fileContents:
+            print(line)
+            file.write(line + "\n")
 
 if __name__ == "__main__":
     main()
