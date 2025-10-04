@@ -18,7 +18,6 @@ def findNetworkConfig():
             ipAddress = IPInfo[i+1]
         elif IPInfo[i] == "netmask":
             netMask = IPInfo[i+1]
-            break
 
     DNSInfo = subprocess.check_output(["cat", "/etc/resolv.conf"], text=True).split()
     dns1 = ""
@@ -49,6 +48,21 @@ def findCPUInfo():
     
     return CPUModel, processorsNumber, coresNumber
 
+def findOSInfo():
+    OSInfo = subprocess.check_output(["cat", "/etc/*release"], text=True).split("\n")
+    OSName = ""
+    OSVersion = ""
+    kernelVersion = subprocess.check_output(["uname", "-r"], text=True)
+
+    for i in range(0, len(OSInfo)):
+        splitLine = OSInfo[i].split("=")
+        if splitLine[0] == "PRETTY_NAME":
+            OSName = splitLine[1].strip('"')
+        elif splitLine[0] == "VERSION_ID":
+            OSVersion = splitLine[1].strip('"')
+    
+    return OSName, OSVersion, kernelVersion
+
 def printAndExport():
     date = subprocess.check_output(["date"], text=True)
     print("System Report - " + date)
@@ -64,14 +78,17 @@ def printAndExport():
     print("DNS1:\t" + dns1)
     print("DNS2:\t" + dns2 + "\n")
 
+    OSName, OSVersion, kernelVersion = findOSInfo()
     print("Operating System Information")
-    print("")
+    print("Operating System:\t" + OSName)
+    print("OS Version:\t" + OSVersion)
+    print("Kernel Version:\t" + kernelVersion + "\n")
 
     CPUModel, processorsNumber, coresNumber = findCPUInfo()
     print("Processor Information")
     print("CPU Model:\t" + CPUModel)
     print("Number of processors:\t" + processorsNumber)
-    print("Number of cores:\t" + coresNumber)
+    print("Number of cores:\t" + coresNumber + "\n")
 
 def main():
     subprocess.run(["clear"])
