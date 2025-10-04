@@ -143,7 +143,7 @@ def generateList():
 def main():
     subprocess.run(["clear"])
     fileContents = generateList()
-    filePath = "~/" + subprocess.check_output(["hostname"], text=True).split(".")[0] + "_system_report.log"
+    filePath = "/home/" + subprocess.check_output(["whoami"], text=True) + "/" + subprocess.check_output(["hostname"], text=True).split(".")[0] + "_system_report.log"
 
     file = open(filePath, "w")
     for line in fileContents:
