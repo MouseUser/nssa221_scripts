@@ -3,7 +3,6 @@
 # Date: 10/3/25
 
 import subprocess
-from types import MemberDescriptorType
 
 def findNetworkConfig():
     defaultGateway = subprocess.check_output(["ip", "route"], text=True).split()[2]
